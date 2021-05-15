@@ -1,4 +1,4 @@
-[![build and release](https://github.com/leelii100/test/actions/workflows/release.yml/badge.svg?branch=master)](https://github.com/leelii100/test/actions/workflows/release.yml)
+[![build and release](https://github.com/leelii100/serien/actions/workflows/release.yml/badge.svg?branch=master)](https://github.com/leelii100/serien/actions/workflows/release.yml)
 
 <!-- PROJECT LOGO -->
 <br/>
