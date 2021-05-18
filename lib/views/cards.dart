@@ -23,6 +23,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Series> apiResponse;
   bool _isLoading = true;
   RefreshController _refreshController = RefreshController();
+  List filteredApiResponse;
 
   @override
   void initState() {
@@ -33,6 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> fetchSeries() async {
     try {
       apiResponse = await service.getSeriesList();
+      filteredApiResponse = apiResponse;
     } catch (e) {
       print('Cant reach server');
       showDialog(
@@ -61,9 +63,9 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     setState(() {
-      while (apiResponse == null) {
-        // _isLoading = true;
-      }
+      // while (apiResponse == null) {
+      //   // _isLoading = true;
+      // }
       _isLoading = false;
     });
     _refreshController.refreshCompleted();
@@ -71,7 +73,27 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void search(query) {
-    print(query);
+    filteredApiResponse = [];
+    for (int i = 0; i < apiResponse.length; i++) {
+      if (apiResponse[i]
+          .name
+          .toUpperCase()
+          .contains(query.toString().toUpperCase())) {
+        filteredApiResponse.add(apiResponse[i]);
+      }
+    }
+    for (int i = 0; i < apiResponse.length; i++) {
+      if (apiResponse[i]
+          .comment
+          .toUpperCase()
+          .contains(query.toString().toUpperCase())) {
+        filteredApiResponse.add(apiResponse[i]);
+      }
+    }
+    Set filteredApiResponseSet = filteredApiResponse.toSet();
+    setState(() {
+      filteredApiResponse = filteredApiResponseSet.toList();
+    });
   }
 
   @override
@@ -115,18 +137,17 @@ class _MyHomePageState extends State<MyHomePage> {
                         controller: _refreshController,
                         onRefresh: fetchSeries,
                         child: StaggeredGridView.countBuilder(
-                          itemCount: apiResponse.length,
+                          itemCount: filteredApiResponse.length,
                           crossAxisCount:
                               (orientation == Orientation.portrait) ? 2 : 3,
                           staggeredTileBuilder: (index) {
-                            if (orientation == Orientation.portrait) {
-                              return const StaggeredTile.fit(2);
-                            } else {
-                              return const StaggeredTile.fit(1);
-                            }
+                            return orientation == Orientation.portrait
+                                ? const StaggeredTile.fit(2)
+                                : const StaggeredTile.fit(1);
                           },
                           itemBuilder: (context, index) {
-                            final item = apiResponse[index].id.toString();
+                            final item =
+                                filteredApiResponse[index].id.toString();
                             return Container(
                               padding: EdgeInsets.all(8),
                               constraints:
@@ -134,8 +155,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Dismissible(
                                 key: Key(item),
                                 onDismissed: (direction) async {
-                                  await service
-                                      .deleteData(apiResponse[index].id);
+                                  await service.deleteData(
+                                      filteredApiResponse[index].id);
                                   fetchSeries();
                                 },
                                 child: Card(
@@ -143,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(4.0)),
                                     onTap: () async {
-                                      if (apiResponse[index].tor) {
+                                      if (filteredApiResponse[index].tor) {
                                         showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
@@ -152,9 +173,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                             actions: [
                                               ElevatedButton(
                                                   onPressed: () {
-                                                    Clipboard.setData(
-                                                        ClipboardData(
-                                                            text: apiResponse[
+                                                    Clipboard.setData(ClipboardData(
+                                                        text:
+                                                            filteredApiResponse[
                                                                     index]
                                                                 .link));
                                                     Navigator.of(context).pop();
@@ -164,7 +185,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                           ),
                                         );
                                       } else {
-                                        await launch(apiResponse[index].link);
+                                        await launch(
+                                            filteredApiResponse[index].link);
                                       }
                                     },
                                     child: Column(
@@ -172,20 +194,22 @@ class _MyHomePageState extends State<MyHomePage> {
                                       children: <Widget>[
                                         ListTile(
                                           leading: Icon((() {
-                                            if (apiResponse[index].paused) {
+                                            if (filteredApiResponse[index]
+                                                .paused) {
                                               return Icons.pause;
                                             }
                                             return Icons.play_arrow;
                                           })()),
-                                          title: Text(apiResponse[index].name),
+                                          title: Text(
+                                              filteredApiResponse[index].name),
                                           subtitle: Text(
-                                              'Season ${apiResponse[index].season} Episode ${apiResponse[index].episode}'),
+                                              'Season ${filteredApiResponse[index].season} Episode ${filteredApiResponse[index].episode}'),
                                         ),
                                         Padding(
                                           padding:
                                               EdgeInsets.fromLTRB(8, 0, 8, 0),
-                                          child:
-                                              Text(apiResponse[index].comment),
+                                          child: Text(filteredApiResponse[index]
+                                              .comment),
                                         ),
                                         Row(
                                           children: <Widget>[
@@ -199,9 +223,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                                     context: context,
                                                     builder: (_) =>
                                                         SeriesModify(
-                                                            apiResponse[index]
+                                                            filteredApiResponse[
+                                                                    index]
                                                                 .id,
-                                                            apiResponse[index]
+                                                            filteredApiResponse[
+                                                                    index]
                                                                 .changed),
                                                   );
                                                   fetchSeries();
