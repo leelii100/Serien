@@ -67,8 +67,8 @@ class _SettingsState extends State<Settings> {
                 if (settingsKey.currentState.validate()) {
                   Navigator.of(context).pop();
                   prefs.setString('url', 'http://' + ipController.text);
+                  callback();
                 }
-                callback();
               },
               icon: Icon(Icons.check),
               label: Text('Submit'),
