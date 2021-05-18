@@ -29,11 +29,6 @@ class _SeriesModifyState extends State<SeriesModify> {
   bool _isTor = false;
   bool loaded = false;
 
-  @override
-  initState() {
-    super.initState();
-  }
-
   setData(snapshot) async {
     if (id == 0) {
       nameController.text = '';
@@ -43,20 +38,18 @@ class _SeriesModifyState extends State<SeriesModify> {
     }
     Series data = snapshot.data;
     changed = snapshot.data.changed;
-    setState(() {
-      try {
-        nameController.text = data.name;
-        _episode = data.episode;
-        _season = data.season;
-        linkController.text = data.link;
-        commentController.text = data.comment;
-        _isPaused = data.paused;
-        _isTor = data.tor;
-        loaded = true;
-      } catch (e) {
-        print(e);
-      }
-    });
+    try {
+      nameController.text = data.name;
+      _episode = data.episode;
+      _season = data.season;
+      linkController.text = data.link;
+      commentController.text = data.comment;
+      _isPaused = data.paused;
+      _isTor = data.tor;
+      loaded = true;
+    } catch (e) {
+      print(e);
+    }
   }
 
   String buildJson() {
@@ -70,14 +63,14 @@ class _SeriesModifyState extends State<SeriesModify> {
         '"Tor" : $_isTor }';
   }
 
-  sendData() {
+  sendData() async {
     String json = buildJson();
-    service.sendData(json);
+    await service.sendData(json);
   }
 
-  updateData(id) {
+  updateData(id) async {
     String json = buildJson();
-    service.updateData(id, json);
+    await service.updateData(id, json);
   }
 
   Widget build(BuildContext context) {
@@ -97,54 +90,56 @@ class _SeriesModifyState extends State<SeriesModify> {
             })()),
             content: Container(
               width: 400.0,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextFormField(
-                    controller: nameController,
-                    decoration: InputDecoration(helperText: 'Name'),
-                  ),
-                  CounterField(
-                    value: _season,
-                    label: 'Season',
-                    onClicked: (value) => _season = value,
-                  ),
-                  CounterField(
-                    value: _episode,
-                    label: 'Episode',
-                    onClicked: (value) => _episode = value,
-                  ),
-                  TextFormField(
-                    controller: linkController,
-                    decoration: InputDecoration(helperText: 'Link'),
-                  ),
-                  TextFormField(
-                    controller: commentController,
-                    decoration: InputDecoration(helperText: 'Comment'),
-                  ),
-                  LabeledCheckbox(
-                    label: 'Paused',
-                    padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
-                    value: _isPaused,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        _isPaused = newValue;
-                      });
-                    },
-                  ),
-                  LabeledCheckbox(
-                    label: 'Tor',
-                    padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
-                    value: _isTor,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        _isTor = newValue;
-                      });
-                    },
-                  ),
-                ],
-              ),
+              child: ListView(children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextFormField(
+                      controller: nameController,
+                      decoration: InputDecoration(helperText: 'Name'),
+                    ),
+                    CounterField(
+                      value: _season,
+                      label: 'Season',
+                      onClicked: (value) => _season = value,
+                    ),
+                    CounterField(
+                      value: _episode,
+                      label: 'Episode',
+                      onClicked: (value) => _episode = value,
+                    ),
+                    TextFormField(
+                      controller: linkController,
+                      decoration: InputDecoration(helperText: 'Link'),
+                    ),
+                    TextFormField(
+                      controller: commentController,
+                      decoration: InputDecoration(helperText: 'Comment'),
+                    ),
+                    LabeledCheckbox(
+                      label: 'Paused',
+                      padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
+                      value: _isPaused,
+                      onChanged: (bool newValue) {
+                        setState(() {
+                          _isPaused = newValue;
+                        });
+                      },
+                    ),
+                    LabeledCheckbox(
+                      label: 'Tor',
+                      padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
+                      value: _isTor,
+                      onChanged: (bool newValue) {
+                        setState(() {
+                          _isTor = newValue;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ]),
             ),
             actions: <Widget>[
               TextButton(
@@ -152,12 +147,12 @@ class _SeriesModifyState extends State<SeriesModify> {
                   padding: const EdgeInsets.all(8.0),
                   child: Text('OK'),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   loaded = false;
                   if (id == 0) {
-                    sendData();
+                    await sendData();
                   } else {
-                    updateData(id);
+                    await updateData(id);
                   }
                   Navigator.of(context).pop();
                 },

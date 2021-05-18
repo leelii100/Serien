@@ -1,12 +1,17 @@
 import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:serien/models/series.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class API {
-  final Uri url = Uri.http('192.168.178.22:5000', 'series');
+  Future<Uri> getUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    final Uri url = Uri.parse(prefs.getString('url') + '/series');
+    return url;
+  }
 
-  Future getSeriesList() {
-    return get(url).then((data) {
+  Future getSeriesList() async {
+    return get(await getUrl()).then((data) {
       if (data.statusCode == 200) {
         final jsonData = json.decode(data.body);
         final notes = <Series>[];
@@ -23,7 +28,7 @@ class API {
         }
         return (finalnotes);
       }
-      print('API Error');
+      print('API error code: ${data.statusCode}');
     });
   }
 
@@ -50,19 +55,23 @@ class API {
     });
   }
 
-  sendData(String json) {
+  sendData(String json) async {
     Map<String, String> headers = {"content-type": "application/json"};
-    post(url, headers: headers, body: json);
+    await post(await getUrl(), headers: headers, body: json);
   }
 
-  void deleteData(int id) {
-    Uri deleteUrl = Uri.parse(url.toString() + '/$id');
-    delete(deleteUrl);
+  deleteData(int id) async {
+    Uri uri = await getUrl();
+    String url = uri.toString();
+    Uri deleteUrl = Uri.parse(url + '/$id');
+    await delete(deleteUrl);
   }
 
-  updateData(int id, String json) {
-    Uri updateUrl = Uri.parse(url.toString() + '/$id');
+  updateData(int id, String json) async {
+    Uri uri = await getUrl();
+    String url = uri.toString();
+    Uri updateUrl = Uri.parse(url + '/$id');
     Map<String, String> headers = {"content-type": "application/json"};
-    put(updateUrl, headers: headers, body: json);
+    await put(updateUrl, headers: headers, body: json);
   }
 }
