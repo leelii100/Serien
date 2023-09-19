@@ -11,16 +11,16 @@ class Series {
   DateTime time;
 
   Series(
-      {this.id,
-      this.name,
-      this.season,
-      this.episode,
-      this.link,
-      this.comment,
-      this.paused,
-      this.tor,
-      this.changed,
-      this.time});
+      {required this.id,
+      required this.name,
+      required this.season,
+      required this.episode,
+      required this.link,
+      required this.comment,
+      required this.paused,
+      required this.tor,
+      required this.changed,
+      required this.time});
 
   factory Series.fromJSON(Map item) {
     return Series(

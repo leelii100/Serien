@@ -7,26 +7,22 @@ class Settings extends StatefulWidget {
   Settings(this.callback);
 
   @override
-  _SettingsState createState() => _SettingsState(this.callback);
+  _SettingsState createState() => _SettingsState();
 }
 
 class _SettingsState extends State<Settings> {
-  final Function callback;
-
   final settingsKey = GlobalKey<FormState>();
-  SharedPreferences prefs;
-  String url;
+  late SharedPreferences prefs;
+  String url = '';
   TextEditingController ipController = TextEditingController();
-
-  _SettingsState(this.callback);
 
   @override
   void initState() {
-    getIP();
     super.initState();
+    getIP();
   }
 
-  getIP() async {
+  Future<void> getIP() async {
     prefs = await SharedPreferences.getInstance();
     url = prefs.getString('url') ?? '';
     ipController.text = url.replaceAll('http://', '');
@@ -34,6 +30,7 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
+    ipController.text = url;
     return Scaffold(
       appBar: AppBar(
         title: Text('Settings'),
@@ -46,7 +43,6 @@ class _SettingsState extends State<Settings> {
               key: settingsKey,
               child: TextFormField(
                 controller: ipController,
-                initialValue: url,
                 decoration: InputDecoration(
                     helperText: 'IP-Adresse',
                     hintText: 'e.g. 192.168.178.22:5000'),
@@ -56,18 +52,18 @@ class _SettingsState extends State<Settings> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter some text';
                   } else if (!regEx.hasMatch(value)) {
-                    return 'Not a valid IP Adress. Make sure you specify the address and the port.';
+                    return 'Not a valid IP Address. Make sure you specify the address and the port.';
                   }
                   return null;
                 },
               ),
             ),
             ElevatedButton.icon(
-              onPressed: () {
-                if (settingsKey.currentState.validate()) {
+              onPressed: () async {
+                if (settingsKey.currentState!.validate()) {
                   Navigator.of(context).pop();
-                  prefs.setString('url', 'http://' + ipController.text);
-                  callback();
+                  await prefs.setString('url', 'http://' + ipController.text);
+                  widget.callback();
                 }
               },
               icon: Icon(Icons.check),

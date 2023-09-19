@@ -121,20 +121,24 @@ class _SeriesModifyState extends State<SeriesModify> {
                       label: 'Paused',
                       padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
                       value: _isPaused,
-                      onChanged: (bool newValue) {
-                        setState(() {
-                          _isPaused = newValue;
-                        });
+                      onChanged: (bool? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _isPaused = newValue;
+                          });
+                        }
                       },
                     ),
                     LabeledCheckbox(
                       label: 'Tor',
                       padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
                       value: _isTor,
-                      onChanged: (bool newValue) {
-                        setState(() {
-                          _isTor = newValue;
-                        });
+                      onChanged: (bool? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _isTor = newValue;
+                          });
+                        }
                       },
                     ),
                   ],

@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class API {
   Future<Uri> getUrl() async {
     final prefs = await SharedPreferences.getInstance();
-    final Uri url = Uri.parse(prefs.getString('url') + '/series');
+    final Uri url = Uri.parse(prefs.getString('url')! + '/series');
     return url;
   }
 
@@ -20,7 +20,7 @@ class API {
         }
         final finalnotes = <Series>[];
         for (Series i in notes) {
-          if (!i.paused) {
+          if (i.paused) {
             finalnotes.insert(0, i);
             continue;
           }
@@ -32,7 +32,7 @@ class API {
     });
   }
 
-  getSeries(int id) {
+  Future<Object>? getSeries(int id) {
     return getSeriesList().then((data) {
       if (id == 0) {
         return Series(
@@ -52,6 +52,7 @@ class API {
           return i;
         }
       }
+      return Null;
     });
   }
 
